@@ -73,8 +73,8 @@ def fetch_repositories(user_login):
                 'stargazers_count': repo['stargazers_count'],
                 'watchers_count': repo['watchers_count'],
                 'language': repo['language'],
-                'has_projects': repo['has_projects'],
-                'has_wiki': repo['has_wiki'],
+                'has_projects': ('true' if repo[ 'has_projects'] else 'false'),
+                'has_wiki': ('true' if repo[ 'has wiki'] else 'false'),
                 'license_name': repo['license']['key'] if repo['license'] else None,
             })
 

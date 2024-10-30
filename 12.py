@@ -1,24 +1,21 @@
 import pandas as pd
 
 def analyze_following_difference(users_csv_path='users.csv'):
-    # Read the data
     df = pd.read_csv(users_csv_path)
-    
-    # Calculate average following for hireable users
+
+    # Handle missing values (adjust as needed)
+    df.fillna({'hireable': False, 'following': 0}, inplace=True)
+
+    # Remove outliers (adjust thresholds as needed)
+    df = df[(df['following'] > 0) & (df['following'] < df['following'].quantile(0.99))]
+
+    # Calculate average following for hireable and non-hireable users
     hireable_following = df[df['hireable'] == True]['following'].mean()
-    
-    # Calculate average following for non-hireable users
-    non_hireable_following = df[df['hireable'] != True]['following'].mean()
-    
-    # Calculate the difference rounded to 3 decimal places
+    non_hireable_following = df[df['hireable'] == False]['following'].mean()
+
+    # Calculate the difference (adjust precision as needed)
     difference = round(hireable_following - non_hireable_following, 3)
-    
-    # Print debug information
-    print(f"Number of hireable users: {len(df[df['hireable'] == True])}")
-    print(f"Number of non-hireable users: {len(df[df['hireable'] != True])}")
-    print(f"Average following for hireable users: {hireable_following:.3f}")
-    print(f"Average following for non-hireable users: {non_hireable_following:.3f}")
-    
+
     return difference
 
 # Calculate the difference

@@ -1,37 +1,36 @@
-
 import pandas as pd
-from sklearn.linear_model import LinearRegression
-import numpy as np
+import statsmodels.api as sm
 
-def analyze_bio_followers_correlation(users_csv_path='users.csv'):
-    # Read the data
-    df = pd.read_csv(users_csv_path)
-    
-    # Filter out rows without bios
-    df = df[df['bio'].notna() & (df['bio'] != '')]
-    
-    # Calculate bio length in Unicode characters
-    df['bio_length'] = df['bio'].str.len()
-    
-    # Prepare data for regression
-    X = df['bio_length'].values.reshape(-1, 1)
-    y = df['followers'].values
-    
-    # Perform linear regression
-    model = LinearRegression()
-    model.fit(X, y)
-    
-    # Get the slope rounded to 3 decimal places
-    slope = round(model.coef_[0], 3)
-    
-    # Print debug information
-    print(f"Number of users with bios: {len(df)}")
-    print(f"Bio length range: {df['bio_length'].min()} to {df['bio_length'].max()}")
-    print(f"Followers range: {df['followers'].min()} to {df['followers'].max()}")
-    print(f"R-squared: {model.score(X, y):.3f}")
-    
-    return slope
+# Load the CSV file
+csv_file = 'users.csv'  # Ensure this path is correct
 
-# Calculate the regression slope
-result = analyze_bio_followers_correlation()
-print(f"\nRegression slope: {result:.3f}")
+# Load the CSV into a DataFrame
+df = pd.read_csv(csv_file)
+
+# Check the first few rows and the data types of the DataFrame
+print("DataFrame Overview:")
+print(df.head())
+print("\nDataFrame Info:")
+print(df.info())
+
+# Filter out users without bios
+df = df[df['bio'].notnull()]
+
+# Calculate the length of each bio in words
+df['bio_word_count'] = df['bio'].str.split().str.len()
+
+# Prepare the independent variable (X) and dependent variable (y)
+X = df['bio_word_count']
+y = df['followers']  # Adjust the column name as per your dataset
+
+# Add a constant to the independent variable (for the intercept)
+X = sm.add_constant(X)
+
+# Fit the regression model
+model = sm.OLS(y, X).fit()
+
+# Get the slope (coefficient of the bio_word_count)
+slope = model.params['bio_word_count']
+
+# Print the regression slope rounded to three decimal places
+print(f"\nRegression slope of followers on bio word count: {slope:.3f}")

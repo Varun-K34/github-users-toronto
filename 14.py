@@ -1,22 +1,24 @@
 import pandas as pd
 
-# Load the users data
-df = pd.read_csv('users.csv')
+def top_weekend_contributors(repositories_csv_path='repositories.csv'):
+    # Read the repositories data
+    df = pd.read_csv(repositories_csv_path)
+    
+    # Ensure 'created_at' is in datetime format
+    df['created_at'] = pd.to_datetime(df['created_at'])
+    
+    # Filter for weekend days (Saturday=5, Sunday=6)
+    df['weekday'] = df['created_at'].dt.weekday
+    weekend_repos = df[df['weekday'].isin([5, 6])]
+    
+    # Count the number of repositories created by each user
+    top_users = weekend_repos['login'].value_counts().head(5)
+    
+    # Get the user logins in order
+    top_users_logins = ', '.join(top_users.index)
+    
+    return top_users_logins
 
-# Convert 'created_at' to datetime
-df['created_at'] = pd.to_datetime(df['created_at'])
-
-# Extract day of the week (0=Monday, 6=Sunday)
-df['day_of_week'] = df['created_at'].dt.dayofweek
-
-# Filter for weekends (5=Saturday, 6=Sunday)
-weekend_repos = df[df['day_of_week'].isin([5, 6])]
-
-# Count repositories and get top 5 users
-top_weekend_users = weekend_repos['login'].value_counts().head(5)
-
-# Join user logins for output
-user_logins = ', '.join(top_weekend_users.index)
-
-# Print the result
-print(user_logins)
+# Call the function and print the result
+result = top_weekend_contributors()
+print(f"Top 5 users who created the most repositories on weekends: {result}")

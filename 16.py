@@ -1,28 +1,29 @@
-import csv
+import pandas as pd
 from collections import Counter
 
-# Counter to store surname frequencies
-surname_counter = Counter()
+def most_common_surname(users_csv_path='users.csv'):
+    # Read the data
+    df = pd.read_csv(users_csv_path)
 
-# Open the users.csv file and read data
-with open('users.csv', 'r', encoding='utf-8') as file:
-    reader = csv.DictReader(file)
-    
-    for row in reader:
-        name = row.get('name', '').strip()
-        if name:  # Ignore missing names
-            # Split the name by whitespace and get the last word as the surname
-            surname = name.split()[-1]
-            surname_counter[surname] += 1
+    # Filter out rows with missing names
+    names = df['name'].dropna().str.strip()
 
-# Find the maximum frequency of surnames
-if surname_counter:
-    max_count = max(surname_counter.values())
-    # Get all surnames with the maximum frequency
-    most_common_surnames = [surname for surname, count in surname_counter.items() if count == max_count]
-    # Sort surnames alphabetically
+    # Extract surnames (last word in the name)
+    surnames = names.str.split().str[-1]
+
+    # Count occurrences of each surname
+    surname_counts = Counter(surnames)
+
+    # Find the maximum occurrence(s)
+    max_count = max(surname_counts.values())
+    most_common_surnames = [surname for surname, count in surname_counts.items() if count == max_count]
+
+    # Sort the surnames alphabetically
     most_common_surnames.sort()
-    # Output the result
-    print(f"{', '.join(most_common_surnames)}: {max_count}")
-else:
-    print("No names found.")
+
+    # Print the result
+    return ', '.join(most_common_surnames)
+
+# Get the most common surname(s)
+result = most_common_surname()
+print(f"Most common surname(s): {result}")
